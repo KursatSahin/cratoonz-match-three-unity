@@ -29,8 +29,8 @@ public class HomeManager : MonoBehaviour
 
     private void Awake()
     {
-        _playButtonText.text = TextKeywords.Home.HomePlayButtonText;
-        _exitButtonText.text = TextKeywords.Home.HomeExitButtonText;
+        _playButtonText.text = StringKeywords.Home.HomePlayButtonText;
+        _exitButtonText.text = StringKeywords.Home.HomeExitButtonText;
     }
 
     private void OnEnable()
@@ -73,7 +73,7 @@ public class HomeManager : MonoBehaviour
     /// </summary>
     private async void LoadGameScene()
     {
-        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Scene");
+        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(StringKeywords.Scenes.Game);
         await UniTask.WaitUntil(() => asyncOperation.isDone);
     }
 
