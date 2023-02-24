@@ -8,11 +8,9 @@ namespace Game
     {
         [SerializeField] private float _tileSize = 1.28f;
         [SerializeField] private float _boardScreenPercent = 94.81f;
-        [SerializeField] private BoardSettingsSO _boardSettings;
-
-        private float BoardScreenRatio => _boardScreenPercent / 100;
+        [SerializeField] private BoardSettings _boardSettings;
         
-        //private float boardWidth = 1080 * _boardScreenRatio / 100;
+        private float BoardScreenRatio => _boardScreenPercent / 100;
         
         /// <summary>
         /// Adjust orthographic camera size with fixed tile size value
