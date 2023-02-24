@@ -42,8 +42,4 @@ namespace Core.Services
             return (T) _services[type];
         }
     }
-        
-    public interface IService
-    {
-    }
 }
