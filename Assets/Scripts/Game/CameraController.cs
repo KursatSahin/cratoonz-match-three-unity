@@ -1,6 +1,8 @@
 ﻿using System;
+using Bootsrapper;
+using Containers;
 using UnityEngine;
-using UnityEngine.Serialization;
+using static Containers.ContainerFacade;
 
 namespace Game
 {
@@ -8,9 +10,20 @@ namespace Game
     {
         [SerializeField] private float _tileSize = 1.28f;
         [SerializeField] private float _boardScreenPercent = 94.81f;
-        [SerializeField] private BoardSettings _boardSettings;
+        
+        private BoardSettings _boardSettings;
         
         private float BoardScreenRatio => _boardScreenPercent / 100;
+
+        private void Awake()
+        {
+            _boardSettings = AppBootstrapper.Containers.BoardSettingsContainer.BoardSettings;
+        }
+
+        private void Start()
+        {
+            AdjustOrthographicCameraSize();
+        }
         
         /// <summary>
         /// Adjust orthographic camera size with fixed tile size value
@@ -32,10 +45,6 @@ namespace Game
                 float differenceInSize = targetRatio / screenRatio;
                 Camera.main.orthographicSize = ((_boardSettings.BoardHeight * _tileSize) / BoardScreenRatio) / 2 * differenceInSize;
             }
-        }
-        private void Start()
-        {
-            AdjustOrthographicCameraSize();
         }
     }
 }
