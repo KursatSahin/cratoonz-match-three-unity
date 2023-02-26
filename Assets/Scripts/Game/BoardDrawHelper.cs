@@ -1,34 +1,51 @@
+using Bootsrapper;
+using Containers;
+using Core.Services;
 using UnityEngine;
+using static Containers.ContainerFacade;
 
 namespace Game
 {
-    public class BoardDrawHelper : MonoBehaviour, IBoardDrawHelper
+    public class BoardDrawHelper : IBoardDrawHelper
     {
-        [Header("Board Settings Dependencies")]
-        [SerializeField] private BoardSettings _boardSettings;
-        [SerializeField] private float _tileSize = 1.28f;
-        
+        private BoardSettings _boardSettings;
         private Vector3 _originPosition;
         
         // [Space]
         // [SerializeField]
         // [SerializeField] private float _tileSize = 1.28f;
 
+        public BoardDrawHelper()
+        {
+            _boardSettings = AppBootstrapper.Containers.BoardSettingsContainer.BoardSettings;
+            _originPosition = GetOriginPosition(_boardSettings.BoardHeight, _boardSettings.BoardWidth);
+        }
+
         private Vector3 GetOriginPosition(int rowCount, int columnCount)
         {
-            var offsetY = Mathf.Floor(rowCount / 2.0f) * _tileSize;
-            var offsetX = Mathf.Floor(columnCount / 2.0f) * _tileSize;
+            var offsetY = Mathf.Floor(rowCount / 2.0f) * _boardSettings.TileSize;
+            var offsetX = Mathf.Floor(columnCount / 2.0f) * _boardSettings.TileSize;
 
-            return new Vector3(-offsetX, offsetY);
+            if (rowCount % 2 == 0)
+            {
+                offsetY -= _boardSettings.TileSize / 2;
+            }
+            
+            if (columnCount % 2 == 0)
+            {
+                offsetX -= _boardSettings.TileSize / 2;
+            }
+            
+            return new Vector3(-offsetX, -offsetY);
         }
         
         public Vector3 GetWorldPosition(int rowIndex, int columnIndex)
         {
-            return new Vector3(columnIndex, -rowIndex) * _tileSize + _originPosition;
+            return new Vector3(columnIndex, rowIndex) * _boardSettings.TileSize + _originPosition;
         }
     }
 
-    public interface IBoardDrawHelper
+    public interface IBoardDrawHelper : IService
 
     {
     /// <summary>

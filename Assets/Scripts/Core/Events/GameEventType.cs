@@ -2,8 +2,16 @@
 {
     public enum GameEventType : ushort
     {
-        // TODO: Add events and remove following placeholders
-        event_1,
-        event_2,
+        
+        
+        //Input Events
+        BlockInputHandler,
+        UnblockInputHandler,
+        SwipeInputDetected,
+        LongPressInputDetected,
+        TapInputDetected,
+        
+        //Board Events
+        NewGemGenerated,
     }
 }
