@@ -11,10 +11,6 @@ namespace Game
         private BoardSettings _boardSettings;
         private Vector3 _originPosition;
         
-        // [Space]
-        // [SerializeField]
-        // [SerializeField] private float _tileSize = 1.28f;
-
         public BoardDrawHelper()
         {
             _boardSettings = AppBootstrapper.Containers.BoardSettingsContainer.BoardSettings;
