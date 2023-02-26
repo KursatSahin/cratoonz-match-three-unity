@@ -11,7 +11,6 @@ namespace Game.Board.Views
     public class GemView : MonoBehaviour
     {
         #region Inspector Fields
-        [SerializeField] private GemContainer _gemContainer;
         [SerializeField] private Color _defaultColor;
         [SerializeField] private Color _selectedColor;
         #endregion
@@ -20,9 +19,11 @@ namespace Game.Board.Views
         private SpriteRenderer _spriteRenderer;
         private static IBoardDrawHelper _boardDrawHelper;
         private static BoardSettings _boardSettings;
+        private static GemContainer _gemContainer;
         #endregion 
 
         #region Properties
+        public static GemView PreviousSelected { get; private set; }
         public Gem Data { get; private set; }
         #endregion
     
@@ -31,6 +32,7 @@ namespace Game.Board.Views
         {
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             _boardSettings = AppBootstrapper.Containers.BoardSettingsContainer.BoardSettings;
+            _gemContainer = AppBootstrapper.Containers.GemContainer;
         }
 
         private void OnDisable()
@@ -51,12 +53,45 @@ namespace Game.Board.Views
 
             Data = data;
             _spriteRenderer.sprite = _gemContainer.Gems[(int)Data.Color];
-            transform.position = _boardDrawHelper.GetWorldPosition(data.Position.X, data.Position.Y);
+            transform.position = _boardDrawHelper.GetWorldPosition(data.Position.Y, data.Position.X);
             
             Data.PositionChanged += OnPositionChanged;
             Data.DestroyGem += OnDestroyGem;
         }
 
+        public void Select()
+        {
+            if (PreviousSelected)
+                PreviousSelected.Deselect();
+
+            PreviousSelected = this;
+            
+            _spriteRenderer.color = _selectedColor;
+        }
+
+        public void Deselect()
+        {
+            if (PreviousSelected == null) 
+                return;
+
+            // Hide outline
+            PreviousSelected = null;
+            
+            _spriteRenderer.color = _defaultColor;
+        }
+        
+        public List<Point> GetAdjacents()
+        {
+            var adjacents = new List<Point>();
+
+            if (Data.Position.X > 0)  adjacents.Add(new Point(Data.Position.X - 1, Data.Position.Y));
+            if (Data.Position.X < _boardSettings.BoardWidth - 1)  adjacents.Add(new Point(Data.Position.X + 1, Data.Position.Y));
+            if (Data.Position.Y > 0)  adjacents.Add(new Point(Data.Position.X, Data.Position.Y - 1));
+            if (Data.Position.Y < _boardSettings.BoardHeight - 1)  adjacents.Add(new Point(Data.Position.X, Data.Position.Y + 1));
+
+            return adjacents;
+        }
+        
         #endregion
 
         #region Private Functions

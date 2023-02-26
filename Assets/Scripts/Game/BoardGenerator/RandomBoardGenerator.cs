@@ -61,9 +61,9 @@ namespace Game
             _previousLeft = new Gem.GemColor[boardSettings.BoardHeight];
             _previousBelow = Gem.GemColor.None;
 
-            for (int col = 0; col < boardSettings.BoardHeight; col++)
+            for (int row = 0; row < boardSettings.BoardHeight; row++)
             {
-                for (int row = 0; row < boardSettings.BoardWidth; row++)
+                for (int col = 0; col < boardSettings.BoardWidth; col++)
                 {
                     // Convert 2d index to 1d index
                     if (tiles[row, col].Type == Tile.TileType.Normal)
@@ -82,11 +82,11 @@ namespace Game
         {
             Tile[,] tiles = new Tile[boardSettings.BoardWidth, boardSettings.BoardHeight];
             
-            for (int i = 0; i < boardSettings.BoardHeight; i++)
+            for (int row = 0; row < boardSettings.BoardHeight; row++)
             {
-                for (int j = 0; j < boardSettings.BoardWidth; j++)
+                for (int col = 0; col < boardSettings.BoardWidth; col++)
                 {
-                    tiles[i, j] = new Tile(Tile.TileType.Normal);
+                    tiles[row, col] = new Tile(Tile.TileType.Normal);
                 }
             }
 

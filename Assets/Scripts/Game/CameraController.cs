@@ -23,8 +23,22 @@ namespace Game
         private void Start()
         {
             AdjustOrthographicCameraSize();
+            SetCameraPosition();
         }
-        
+
+        private void SetCameraPosition()
+        {
+            // Get the position of the bottom of the screen
+            Vector3 bottomOfScreen = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width/2, 200, 0));
+            var diff = bottomOfScreen.y + (_boardSettings.BoardHeight/2 * _tileSize);
+            if (_boardSettings.BoardHeight % 2 == 0)
+            {
+                diff -= _tileSize / 2;
+            }
+            
+            Camera.main.transform.position = new Vector3(0, Mathf.Abs(diff), -1);
+        }
+
         /// <summary>
         /// Adjust orthographic camera size with fixed tile size value
         /// </summary>
