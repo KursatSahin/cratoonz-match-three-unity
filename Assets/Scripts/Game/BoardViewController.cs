@@ -22,6 +22,7 @@ namespace Game
         private BoardSettings _boardSettings;
         private Tile[,] _tileMap;
         private Gem[,] _gemMap;
+        private BoardLogic _boardLogic;
         
         private IBoardDrawHelper _boardDrawHelper;
         private IBoardGenerator _boardGenerator;
@@ -68,17 +69,28 @@ namespace Game
             // Adjust the parent container for the gems
             _gemParent.localScale = boardScale;
 
+            _boardLogic = new BoardLogic(_gemMap);
+            
             DrawTiles();
             DrawGems();
 
             _eventDispatcher.Subscribe(GameEventType.SwipeInputDetected, OnSwipe);
             _eventDispatcher.Subscribe(GameEventType.TapInputDetected, OnTap);
+            _eventDispatcher.Subscribe(GameEventType.NewGemGenerated, OnNewGemGenerated);
         }
 
         private void OnDestroy()
         {
             _eventDispatcher.Unsubscribe(GameEventType.SwipeInputDetected, OnSwipe);
             _eventDispatcher.Unsubscribe(GameEventType.TapInputDetected, OnTap);
+            _eventDispatcher.Unsubscribe(GameEventType.NewGemGenerated, OnNewGemGenerated);
+        }
+
+        private void Update()
+        {
+            _boardLogic.FindMatchesAndClear();
+            //_boardLogic.SettleBoard();
+            //_boardLogic.FillEmptySlots();
         }
 
         private void DrawTiles()
@@ -109,12 +121,19 @@ namespace Game
         /// Spawns a gem and sets its data
         /// </summary>
         /// <param name="gemData"></param>
-        public void GenerateGemView(Gem gemData)
+        private void GenerateGemView(Gem gemData)
         {
             if (LeanPool.Spawn(_gemPrefab, _gemParent, true).TryGetComponent(out GemView gemView))
             {
                 gemView.SetGemData(gemData);
             }
+        }
+        
+        private void OnNewGemGenerated(IEvent e)
+        {
+            var newGemEvent = e as NewGemGeneratedEvent;
+            
+            GenerateGemView(newGemEvent.GeneratedGem);
         }
         
         /// <summary>
@@ -145,7 +164,7 @@ namespace Game
                     // if there is already a different selected gem and the tapped gem is its neighbour, swap them
                     if (gemView.GetAdjacents().Contains(GemView.PreviousSelected.Data.Position))
                     {
-                        //_boardLogic.SwapGems(gemView.Data, GemView.PreviousSelected.Data);
+                        _boardLogic.SwapGems(gemView.Data, GemView.PreviousSelected.Data);
                         GemView.PreviousSelected.Deselect();
                     }
                     // if there is already a different selected gem and the tapped gem is not its neighbour, deselect previous one and select this
@@ -182,7 +201,7 @@ namespace Game
             if (!IsPositionValid(toPosition)) return;
 
             // swap the gems at starting position of swipe and its neighbour which is found with swipe direction
-            //_boardLogic.SwapGems(gemView.Data, _boardLogic.Board[toPosition.y, toPosition.x]);
+            _boardLogic.SwapGems(gemView.Data, _gemMap[toPosition.Y, toPosition.X]);
         }
 
         /// <summary>

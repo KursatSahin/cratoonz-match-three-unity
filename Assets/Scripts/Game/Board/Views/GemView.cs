@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Bootsrapper;
 using Containers;
+using Core.Events;
 using Core.Services;
 using DG.Tweening;
 using Lean.Pool;
@@ -20,6 +21,7 @@ namespace Game.Board.Views
         private static IBoardDrawHelper _boardDrawHelper;
         private static BoardSettings _boardSettings;
         private static GemContainer _gemContainer;
+        private IEventDispatcher _eventDispatcher;
         #endregion 
 
         #region Properties
@@ -33,6 +35,7 @@ namespace Game.Board.Views
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             _boardSettings = AppBootstrapper.Containers.BoardSettingsContainer.BoardSettings;
             _gemContainer = AppBootstrapper.Containers.GemContainer;
+            _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
         }
 
         private void OnDisable()
@@ -98,12 +101,21 @@ namespace Game.Board.Views
         
         private void OnDestroyGem()
         {
+            Data.PositionChanged -= OnPositionChanged;
+            Data.DestroyGem -= OnDestroyGem;
+            Data = null;
             
+            _spriteRenderer.DOFade(0, 0.4f).
+                OnComplete(() => LeanPool.Despawn(gameObject));
         }
 
         private void OnPositionChanged(Point position, float durationFactor)
         {
-            
+            transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.4f * durationFactor)
+                .SetEase(Ease.OutCirc).OnComplete((() =>
+                {
+                    _eventDispatcher.Fire(GameEventType.UnblockInputHandler);
+                }));
         }
 
         #endregion

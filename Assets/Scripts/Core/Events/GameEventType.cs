@@ -10,5 +10,8 @@
         SwipeInputDetected,
         LongPressInputDetected,
         TapInputDetected,
+        
+        //Board Events
+        NewGemGenerated,
     }
 }
