@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Bootsrapper;
 using Containers;
 using Core.Events;
 using Core.Services;
 using DG.Tweening;
+using Game.Animation;
 using Lean.Pool;
 using UnityEngine;
 
@@ -22,6 +24,7 @@ namespace Game.Board.Views
         private static BoardSettings _boardSettings;
         private static GemContainer _gemContainer;
         private IEventDispatcher _eventDispatcher;
+        private IAnimationManager _animationManager;
         #endregion 
 
         #region Properties
@@ -40,7 +43,8 @@ namespace Game.Board.Views
 
         private void OnDisable()
         {
-            _spriteRenderer.color = _defaultColor;
+            //_spriteRenderer.color = _defaultColor;
+            transform.localScale = Vector3.one;
         }
 
         #endregion
@@ -54,6 +58,11 @@ namespace Game.Board.Views
                 _boardDrawHelper = ServiceLocator.Instance.Get<IBoardDrawHelper>();
             }
 
+            if (_animationManager == null)
+            {
+                _animationManager = ServiceLocator.Instance.Get<IAnimationManager>();
+            }
+            
             Data = data;
             _spriteRenderer.sprite = _gemContainer.Gems[(int)Data.Color];
             transform.position = _boardDrawHelper.GetWorldPosition(data.Position.Y, data.Position.X);
@@ -101,21 +110,38 @@ namespace Game.Board.Views
         
         private void OnDestroyGem()
         {
-            Data.PositionChanged -= OnPositionChanged;
-            Data.DestroyGem -= OnDestroyGem;
-            Data = null;
-            
-            _spriteRenderer.DOFade(0, 0.4f).
-                OnComplete(() => LeanPool.Despawn(gameObject));
+            Sequence destroySequence = DOTween.Sequence().Pause().SetLink(gameObject);
+            //destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
+            destroySequence.Append(transform.DOScale(0, 0.2f).SetEase(Ease.OutQuart));
+            destroySequence.OnComplete(() =>
+            {
+                LeanPool.Despawn(gameObject);
+            });
+            destroySequence.OnStart((() =>
+            {
+                Data.PositionChanged -= OnPositionChanged;
+                Data.DestroyGem -= OnDestroyGem;
+
+                Data = null;
+            }));
+
+            _animationManager.Enqueue(AnimGroup.Destroy, destroySequence);
         }
 
         private void OnPositionChanged(Point position, float durationFactor)
         {
-            transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.4f * durationFactor)
-                .SetEase(Ease.OutCirc).OnComplete((() =>
-                {
-                    _eventDispatcher.Fire(GameEventType.UnblockInputHandler);
-                }));
+            Sequence positionChangedSequence = DOTween.Sequence().Pause().SetLink(gameObject);
+
+            if (Data.IsSwapped)
+            {
+                positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.2f).SetEase(Ease.InOutCirc));
+                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
+            }
+            else
+            {
+                positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.3f * durationFactor).SetEase(Ease.OutBack));
+                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
+            }
         }
 
         #endregion

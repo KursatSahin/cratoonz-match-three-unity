@@ -4,6 +4,7 @@ using Containers;
 using Core.Events;
 using Core.Events.GameEvents;
 using Core.Services;
+using Game.Animation;
 using Game.Board;
 using Game.Board.Views;
 using Lean.Pool;
@@ -24,6 +25,7 @@ namespace Game
         private Gem[,] _gemMap;
         private BoardLogic _boardLogic;
         
+        private IAnimationManager _animationManager;
         private IBoardDrawHelper _boardDrawHelper;
         private IBoardGenerator _boardGenerator;
         private IRandomGenerator _randomGenerator;
@@ -32,6 +34,10 @@ namespace Game
         protected override void Awake()
         {
             base.Awake();
+            
+            // Create and initialize AnimationManager service, and register it to the ServiceLocator
+            _animationManager = new AnimationManager();
+            ServiceLocator.Instance.RegisterService<IAnimationManager>(_animationManager);
             
             // Get BoardSettings from the BoardSettingsContainer
             var prefabProvider = AppBootstrapper.Containers.PrefabContainer;
@@ -48,7 +54,7 @@ namespace Game
             // Create ands initialize BoardDrawHelper service, and register it to the ServiceLocator
             _boardDrawHelper = new BoardDrawHelper();
             ServiceLocator.Instance.RegisterService<IBoardDrawHelper>(_boardDrawHelper);
-            
+
             _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
         }
 
@@ -89,8 +95,15 @@ namespace Game
         private void Update()
         {
             _boardLogic.FindMatchesAndClear();
-            //_boardLogic.SettleBoard();
-            //_boardLogic.FillEmptySlots();
+            _boardLogic.SettleBoard();
+            _boardLogic.FillEmptySlots();
+        }
+
+        private void LateUpdate()
+        {
+            // Run animation manager every frame (after board logic), to make sure if any animations remain in animation queue
+            _animationManager.Play();
+            _animationManager.Reset();
         }
 
         private void DrawTiles()

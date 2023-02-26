@@ -2,6 +2,7 @@
 using Core.Events;
 using Core.Events.GameEvents;
 using Core.Services;
+using Game.Animation;
 using Game.Board;
 using Game.Board.Views;
 using Lean.Touch;
@@ -16,6 +17,7 @@ public class InputHandler : MonoBehaviour
         private bool _isBlocked = false;
         
         private IEventDispatcher _eventDispatcher;
+        private IAnimationManager _animationManager;
         
         #endregion
 
@@ -25,6 +27,7 @@ public class InputHandler : MonoBehaviour
         {
             _mainCamera = Camera.main;
             _eventDispatcher = ServiceLocator.Instance.Get<IEventDispatcher>();
+            _animationManager = ServiceLocator.Instance.Get<IAnimationManager>();
             _isBlocked = true;
         }
         
@@ -120,6 +123,8 @@ public class InputHandler : MonoBehaviour
         private async void OnBlockInputHandler(IEvent e)
         {
             _isBlocked = true;
+
+            await _animationManager.Wait();
         }
         
         #endregion
