@@ -23,8 +23,20 @@ namespace Game.Board
             {
                 if (_position != value)
                 {
-                    var diff = Math.Max(_position.Y - 8, 1);
-                    var durationFactor = 1 + Mathf.Log(diff);
+                    int diff = 0;
+                    float durationFactor; 
+                    
+                    if (_position.Y > 8)
+                    {
+                        diff = Math.Max(_position.Y - 8, 1) * 2;
+                        durationFactor = 2 + Mathf.Log(diff);
+                    }
+                    else
+                    {
+                        diff = Mathf.Max(_position.Y - value.Y, 1);
+                        durationFactor = 1 + Mathf.Log(diff);
+                    }
+                    
                     _position = value;
                     PositionChanged?.Invoke(value, durationFactor);
                 }

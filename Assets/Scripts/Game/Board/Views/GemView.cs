@@ -43,12 +43,8 @@ namespace Game.Board.Views
 
         private void OnDisable()
         {
-            _spriteRenderer.color = _defaultColor;
-        }
-
-        private void OnEnable()
-        {
-            _spriteRenderer.color = _defaultColor;
+            //_spriteRenderer.color = _defaultColor;
+            transform.localScale = Vector3.one;
         }
 
         #endregion
@@ -115,7 +111,8 @@ namespace Game.Board.Views
         private void OnDestroyGem()
         {
             Sequence destroySequence = DOTween.Sequence().Pause().SetLink(gameObject);
-            destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
+            //destroySequence.Append(_spriteRenderer.DOFade(0, 0.4f));
+            destroySequence.Append(transform.DOScale(0, 0.2f).SetEase(Ease.OutQuart));
             destroySequence.OnComplete(() =>
             {
                 LeanPool.Despawn(gameObject);
@@ -134,15 +131,16 @@ namespace Game.Board.Views
         private void OnPositionChanged(Point position, float durationFactor)
         {
             Sequence positionChangedSequence = DOTween.Sequence().Pause().SetLink(gameObject);
-            positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.4f * durationFactor).SetEase(Ease.OutCirc));
 
             if (Data.IsSwapped)
             {
-                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
+                positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.2f).SetEase(Ease.InOutCirc));
+                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
             }
             else
             {
-                _animationManager.Enqueue(AnimGroup.Swap, positionChangedSequence);
+                positionChangedSequence.Append(transform.DOMove(_boardDrawHelper.GetWorldPosition(position.Y, position.X), 0.3f * durationFactor).SetEase(Ease.OutBack));
+                _animationManager.Enqueue(AnimGroup.Gravity, positionChangedSequence);
             }
         }
 

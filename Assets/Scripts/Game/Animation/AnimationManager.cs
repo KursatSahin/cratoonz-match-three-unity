@@ -69,14 +69,6 @@ namespace Game.Animation
             }
 
             var sequence = DOTween.Sequence().Pause();
-            if (_gravitySequence != null)
-            {
-                sequence.Append(_gravitySequence);
-            }
-            if (_destroySequence != null)
-            {
-                sequence.Append(_destroySequence);
-            }
             if (_swapSequence != null)
             {
                 sequence.Append(_swapSequence);
@@ -84,6 +76,14 @@ namespace Game.Animation
             if (_rollbackSequence != null)
             {
                 sequence.Append(_rollbackSequence);
+            }
+            if (_destroySequence != null)
+            {
+                sequence.Append(_destroySequence);
+            }
+            if (_gravitySequence != null)
+            {
+                sequence.Append(_gravitySequence);
             }
             
             _mainSequence.Enqueue(sequence);
